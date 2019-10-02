@@ -1,0 +1,39 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task1.3778509973
+  (:use :cl))
+(in-package :ros.script.task1.3778509973)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun print-list (elements)
+    (cond
+        ((null elements) '()) 
+        (t
+            (write-line (write-to-string (car elements)))
+            (print-list (cdr elements))
+        )
+    )
+  )
+
+  (write-line "Result list:")
+
+  (print-list (
+    (lambda (l1 l2 l3)
+      (list (car l1) (car l2) (car l3))
+    ) 
+    '(D F G H J K) 
+    '(1 2 3 4 5 6 (4 5) 4)
+    '(ER RT TY 5 6 6 5)
+    )
+  )
+;;; vim: set ft=lisp lisp:

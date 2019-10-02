@@ -1,0 +1,32 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task4.3779031609
+  (:use :cl))
+(in-package :ros.script.task4.3779031609)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun councat-sorted (a b)
+    (cond
+      ((and (null a) (null b)) nil)
+      ((and (listp a) (null b)) a)
+      ((and (null a)) (listp b) b)
+      (t (cond 
+        ((<= (car a) (car b)) (cons (car a) (councat-sorted (cdr a) b)))
+        (t (cons (car b) (councat-sorted a (cdr b))))
+      ))
+    )
+  )
+
+  (write-line "concat-sorted")
+  (write-line (write-to-string (councat-sorted '(1 4 25 56) '(3 4 7 29 32 45))))
+;;; vim: set ft=lisp lisp:

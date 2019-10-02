@@ -1,0 +1,59 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task3.3778985890
+  (:use :cl))
+(in-package :ros.script.task3.3778985890)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun concat (a b) 
+    (cond 
+      ((and (null a) (null b)) nil)
+      ((and (listp a) (null b)) a)
+      ((and (null a)) (listp b) b)
+      (t (cons (car a) (concat (cdr a) b)))
+    )
+  )
+
+  (defun left-partition (a b)
+    (cond
+      ((or (null a) (null b)) nil)
+      ((< a (car b)) (left-partition a (cdr b)))
+      (t (cons (car b) (left-partition a (cdr b))))
+    )
+  )
+
+  (defun right-partition (a b)
+    (cond
+      ((or (null a) (null b)) nil)
+      ((>= a (car b)) (right-partition a (cdr b)))
+      (t (cons (car b) (right-partition a (cdr b)))))
+  )
+
+  (defun quick-sort (l)
+    (cond
+      ((null l) nil)
+      (t
+        (concat
+          (concat (quick-sort (left-partition (car l) (cdr l))) (list (car l)))
+          (quick-sort (right-partition (car l) (cdr l)))
+        )
+      )
+    )
+  )
+
+
+
+  (write-line "quick-sort")
+  (write-line (write-to-string (quick-sort '(55 24 79 4 21))))
+  (write-line (write-to-string (quick-sort '(54 40 63 1 44 97 14 66 9 36 99 18 6 59 38 76 27 34 50 65))))
+;;; vim: set ft=lisp lisp:

@@ -1,0 +1,59 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task2.3778513065
+  (:use :cl))
+(in-package :ros.script.task2.3778513065)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun print-list (elements)
+    (cond
+        ((null elements) ()) 
+        (t
+            (write-line (write-to-string (car elements)))
+            (print-list (cdr elements))
+        )
+    )
+  )
+
+  (defun create-list-hard-coded (l1 l2 l3)
+    (list 
+      (fifth l1) (third l2) (second l3)
+    )
+  )
+
+  (defun create-list (&rest tuples)
+    (mapcar #'(lambda (tuple)
+      (nth (- (second tuple) 1) (first tuple))  
+    ) tuples)
+  )
+  
+  (write-line "Hard-coded result: ")
+
+  (print-list 
+    (create-list-hard-coded
+      '(D F G H J K)
+      '(1 2 3 4 5 6 (4 5) 4)
+      '(ER RT TY 5 6 6 5)
+    )
+  )
+
+  (write-line "Smarter solution: ")
+
+  (print-list
+    (create-list 
+      '((D F G H J K) 5)
+      '((1 2 3 4 5 6 (4 5) 4) 3)
+      '((ER RT TY 5 6 6 5) 2)
+    )
+  )
+;;; vim: set ft=lisp lisp:

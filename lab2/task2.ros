@@ -1,0 +1,137 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task2.3778866790
+  (:use :cl))
+(in-package :ros.script.task2.3778866790)
+
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  ;;
+  ;; # common utils
+  ;;
+
+  (defun set-item (l i n) 
+    (cond 
+      ((null (car l)) l)
+      ((and (null (cdr l)) (eql i 0)) (list n))
+      ((eql i 0) (cons n (cdr l)))
+      (t (cons (car l) (set-item (cdr l) (- i 1) n)))
+    )
+  )
+
+  (defun perform-swap-items (l i1 n1 i2 n2)
+    (set-item (set-item l i1 n1) i2 n2)
+  )
+
+  (defun swap-items (l i1 i2)
+    (perform-swap-items l i1 (nth i2 l) i2 (nth i1 l))
+  ) 
+
+  ;; 
+  ;; # insertion sort
+  ;; 
+
+  (defun move-elem (l elem i)
+    (cond 
+      (
+        (and (>= i 0) (> (nth i l) elem)) 
+        (move-elem 
+          (set-item l (+ i 1) (nth i l))
+          elem 
+          (- i 1)
+        )
+      )
+      (t (set-item l (+ i 1) elem))      
+    )
+  )
+
+  (defun sort-list (l n)
+    (cond 
+      ((<= n 1) l)
+      (t (move-elem 
+        (sort-list l (- n 1)) 
+        (nth (- n 1) l) 
+        (- n 2)
+      ))
+    )
+  )
+
+  (defun insertion-sort (l)
+    (sort-list l (length l))
+  )
+
+  ;;
+  ;; # utils for creating Knuth distribution for shell sort
+  ;; # [formula] gap = [(pow(3, k) - 1) / 2] but gap <= (n / 3),
+  ;; # where k - step of distribution
+  ;;         n - count of items in list
+  ;;
+
+  (defun calc-distribution-gap (k) 
+    (round( / (- (expt 3 k) 1 ) 2 ))  
+  )
+
+  (defun get-start-k (n)
+    (round (/ (log (- (* (/ 2 3) n) 1)) (log 3)))
+  )
+
+  (defun create-knuth-distribution (k val)
+    (cond 
+      ((> k 1) (cons val (create-knuth-distribution (- k 1) (calc-distribution-gap (- k 1)))))
+      (t (list val))
+    )
+  )
+
+  (defun knuth-distribution (n)
+    (create-knuth-distribution (get-start-k n) (calc-distribution-gap (get-start-k n)))
+  )
+
+  ;;
+  ;; # shell sort
+  ;;
+
+  (defun move-item-on-gap (l i temp gap)
+    (cond 
+      ((or (< i gap) (>= temp (nth (- i gap) l))) (set-item l i temp))
+      (t (move-item-on-gap (swap-items l i (- i gap)) (- i gap) temp gap))
+    )
+  )
+
+  (defun move-each-item-on-gap (l n i gap)
+    (cond 
+      ((>= i n) l)
+      (t (move-each-item-on-gap (move-item-on-gap l i (nth i l) gap) n (+ i 1) gap)) 
+    )
+  )
+
+  ;; move by each gap and perform each item movement on gap 
+  (defun sort-by-gaps (l n gaps)
+    (cond 
+      ((null gaps) l)
+      (t (sort-by-gaps (move-each-item-on-gap l n (car gaps) (car gaps)) n (cdr gaps)))
+    )
+  )
+
+  ;; syntax sugar for perform sorting
+  (defun shell-sort (l)
+    (sort-by-gaps l (length l) (knuth-distribution (length l)))
+  )
+
+  (write-line "shell-sort")
+  (write-line (write-to-string (shell-sort '(9 0 2 3 1 7 5 6 8 4))))
+  (write-line (write-to-string (shell-sort '(54 40 63 1 44 97 14 66 9 36 99 18 6 59 38 76 27 34 50 65))))
+
+  (write-line "insertion-sort")
+  (write-line (write-to-string (insertion-sort '(9 0 2 3 1 7 5 6 8 4))))
+  (write-line (write-to-string (insertion-sort '(54 40 63 1 44 97 14 66 9 36 99 18 6 59 38 76 27 34 50 65))))
+;;; vim: set ft=lisp lisp:

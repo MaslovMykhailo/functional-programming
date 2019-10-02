@@ -1,0 +1,65 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task.3778564973
+  (:use :cl))
+(in-package :ros.script.task.3778564973)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun custom-member(a s)
+      (cond
+          ((null (atom a)) nil)
+          ((null (listp s)) nil)
+          ((null s) nil)
+          ((equal a (car s)) t)
+          (t (custom-member a (cdr s)))
+      )
+  )
+
+  (defun custom-union(s1 s2)
+      (cond
+          ((null s1) s2)
+          ((null s2) s1)
+          ((custom-member (car s2) s1) (custom-union s1 (cdr s2)))
+          (t (cons (car s2) (custom-union s1 (cdr s2))))
+      )
+  )
+
+  (defun custom-intersection(s1 s2)
+      (cond
+          ((null s1) nil)
+          ((null s2) nil)
+          ((custom-member (car s2) s1) (custom-union (list (car s2)) (custom-intersection s1 (cdr s2))))
+          (t (custom-intersection s1 (cdr s2)))
+      )
+  )
+
+  (defun custom-difference(s1 s2)
+      (cond
+          ((null s1) nil)
+          ((null s2) s1)
+          ((custom-member (car s1) s2) (custom-difference (cdr s1) s2))
+          (t (custom-union (list (car s1)) (custom-difference (cdr s1) s2)))
+      )
+  )
+
+  (defun func(a b c d)
+      (custom-union a (custom-intersection b (custom-difference c d)))
+  )
+
+  (write-line "Call with args: '(a b c) '(e f g) '(h i k) '(l m n)")
+  (write-line (write-to-string (func '(a b c) '(e f g) '(h i k) '(l m n))))
+  (write-line "Call with args: '(a b c) '(c d e) '(e f i) '(i j k)")
+  (write-line (write-to-string (func '(a b c) '(c d e) '(e f i) '(i j k))))
+  (write-line "Call with args: '(a b c) '(b c d) '(c d e) '(e a c)")
+  (write-line (write-to-string (func '(a b c) '(b c d) '(c d e) '(e a c))))
+;;; vim: set ft=lisp lisp:

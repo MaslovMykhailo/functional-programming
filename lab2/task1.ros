@@ -1,0 +1,70 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task1.3778862766
+  (:use :cl))
+(in-package :ros.script.task1.3778862766)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun list-sum (l) 
+    (cond 
+      ((null (cdr l)) 
+        (cond 
+          ((null (car l)) 0)
+          (t (car l))
+        )
+      )
+      (t (list-sum (cons 
+        (+ 
+          (cond 
+            ((listp (car l)) (list-sum (car l)))
+            (t (car l))
+          )
+          (cond 
+            ((listp (car (cdr l))) (list-sum (car (cdr l))))
+            (t (car (cdr l)))
+          ) 
+        ) 
+        (cdr (cdr l))
+      )))
+    )
+  )
+
+  (write-line "calculate sum of list items")
+  (write-line (write-to-string (list-sum '( 1 (2) (3 4) (5 (6 6) 7) (8 9) (10) 11 ))))
+
+
+  (defun flat-list-with-sum (l) 
+    (cond 
+      ((null (cdr l)) 
+        (cond 
+          ((listp (car l)) (list (list-sum (car l))))
+          (t l)
+        )
+      )
+      (t 
+        (cons 
+          (cond 
+            ((listp (car l)) (list-sum (car l)))
+            (t (car l))
+          )
+          (flat-list-with-sum (cdr l))
+        )
+      )
+    )
+  )
+  
+  (write-line "flat list and calculate sum of each item of sublists")
+  (write-line (write-to-string (flat-list-with-sum '( (1 2) ))))
+  (write-line (write-to-string (flat-list-with-sum '( (1 2) (3 4) 5 (6 (7 8) (9 ( 10 11 ) 12) 13) ))))
+  (write-line (write-to-string (flat-list-with-sum '( 1 (2) (3 4) (5 (6 6) 7) (8 9) (10) 11 ))))
+;;; vim: set ft=lisp lisp:

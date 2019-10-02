@@ -1,0 +1,5 @@
+# tasks descriptions and reports
+*.docx
+*.pdf
+
+.DS_Store
