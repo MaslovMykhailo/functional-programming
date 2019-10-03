@@ -1,0 +1,80 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  ;;#+quicklisp(ql:quickload '() :silent t)
+  )
+
+(defpackage :ros.script.task5.3779033304
+  (:use :cl))
+(in-package :ros.script.task5.3779033304)
+
+(defun main (&rest argv)
+  (declare (ignorable argv)))
+
+  (defun concat (a b) 
+    (cond 
+      ((and (null a) (null b)) nil)
+      ((and (listp a) (null b)) a)
+      ((and (null a)) (listp b) b)
+      (t (cons (car a) (concat (cdr a) b)))
+    )
+  )
+
+  (defun permutations (l &optional (remain l))
+    (cond 
+      ((null remain) nil)
+      ((null (cdr l)) (list l))
+      (t (concat 
+        (mapcar 
+          (lambda (subl) (cons (car l) subl))
+          (permutations (cdr l))
+        )
+        (permutations (concat (cdr l) (list (car l))) (cdr remain))
+      ))
+    )
+  )
+
+  (defun all-possible-pairs (l)
+    (mapcon 
+      (lambda (tail)
+        (mapcar 
+          (lambda (item)
+            (list (car tail) item)
+          ) (cdr tail)
+        )
+      ) l
+    )
+  )
+
+  (defun flat-list-items-permutations (l)
+    (cond
+      ((null l) l)
+      (
+        (listp l) 
+        (cond 
+          ((listp (car l)) (concat (permutations (car l)) (flat-list-items-permutations (cdr l))))
+          (t (permutations l))
+        ) 
+      )
+      (t nil)
+    )
+  )
+
+  (defun circular-list-permutations (l) 
+    (all-possible-pairs (flat-list-items-permutations l))
+  )
+
+  (write-line "permutations")
+  (write-line (write-to-string (permutations '(a b c))))
+  (write-line (write-to-string (permutations '(121 212))))
+
+  (write-line "flat-list-items-permutations")
+  (write-line (write-to-string (flat-list-items-permutations '((a b) (c d)))))
+
+  (write-line "circular-list-permutations")
+  (write-line (write-to-string (circular-list-permutations '((a b) (c d)))))
+;;; vim: set ft=lisp lisp:
